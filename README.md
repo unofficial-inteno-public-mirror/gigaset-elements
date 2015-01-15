@@ -81,7 +81,7 @@ In response you will get:
 
 
 Known limitations and workarounds:
-------------------
+----------------------------------
 1. _uleapp_ is supporting _dectproxy_ nevertheless because of unknown reason such configuration is not working stable,
 * it is recommended to disable following applications:
  * dectproxy,
@@ -89,5 +89,7 @@ Known limitations and workarounds:
 2. Only 4 ULE sensors can be registered to the CG300 (attempt to register 5th sensor will fail with MM_REJ_UNSUFFICIENT_MEMORY reason),
 3. Type of registered PP is not verified and always _legacy mode_ is activated (via API_FP_ULE_SET_PVC_LEGACY_MODE_REQ),
 4. PP desubcription is possible but apart of that DECT driver is still accepting communication from deleted PP,
-5. PP SUOTA is not working correctly.
+5. PP SUOTA is not working correctly,
+6. After reload of _uleapp_ PP _Location-Registartion_ is missing and _uleapp_ is not able to determine PP _devId_ correctly ("BadId--1" is reported in this case),
+7. Access Code is automatically changed by _uleapp_ to _5555_ - it's required to register any _Gigaset elements sensor_.
 
