@@ -1,0 +1,56 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2008 OpenWrt.org
+
+START=99
+STOP=09
+
+SERVICE_DAEMONIZE=1
+SERVICE_WRITE_PID=1
+
+
+SHARE_DIR=/usr/share/gigaset-elements
+SCRIPT_DIR=${SHARE_DIR}/scripts
+
+source ${SCRIPT_DIR}/env.sh
+
+
+start() {
+    export PATH=$SCRIPT_DIR:$SHARE_DIR:$PATH
+
+    # generate keypairs and csr if needed
+    ${SCRIPT_DIR}/ssl_gen_csr.sh
+
+    # check databases
+    /usr/bin/coin
+
+    echo REEF basestation with id $DEVICE_ID is being started ...
+    service_start /usr/bin/jbus
+
+    sleep 1
+    service_start /usr/bin/coco_tx --channel tx --ca ${SHARE_DIR}/ca-bundle.pem
+    service_start /usr/bin/coco_rx --channel rx --ca ${SHARE_DIR}/ca-bundle.pem
+    service_start /usr/bin/coco_dx --channel dx --ca ${SHARE_DIR}/ca-bundle.pem
+    service_start /usr/bin/tram
+    service_start /usr/bin/qpa
+    service_start /usr/bin/tick
+    service_start /usr/bin/uleapp -6 -c
+
+    sleep 10
+    # let's assume network is ok
+    touch /var/run/lan.ok
+    echo -e "{\"link\": true}" | /usr/bin/sender 127.0.0.1 network
+    echo Done.
+}
+
+
+stop() {
+    service_stop /usr/bin/tram
+    service_stop /usr/bin/qpa
+    service_stop /usr/bin/coco_dx
+    service_stop /usr/bin/coco_rx
+    service_stop /usr/bin/coco_tx
+    service_stop /usr/bin/tick
+    service_stop /usr/bin/uleapp
+    service_stop /usr/bin/jbus
+}
+
