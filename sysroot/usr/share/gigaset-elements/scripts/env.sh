@@ -28,7 +28,7 @@ export BAS_TAG="bas-001.000.038"
 export BAS_HASH="3837546f98d4aca60a6e269d2bac790942e498b2"
 
 # user agent
-export UA="$(get_version)/${BAS_TAG}"
+export UA="Basestation/${BAS_TAG}/$(get_version)"
 
 # SUOTA TFTP directory
 export TFTP_DIR=/usr/gigaset/data/fw/sensors
