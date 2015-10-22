@@ -24,7 +24,7 @@ DEVICE_ID=$(uci get gigaset.elements.deviceid 2> /dev/null)
 export DEVICE_ID="$DEVICE_ID"
 
 # git tag/hash
-export BAS_TAG="bas-001.000.037"
+export BAS_TAG="bas-001.000.038"
 export BAS_HASH="3837546f98d4aca60a6e269d2bac790942e498b2"
 
 # user agent

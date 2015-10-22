@@ -9,6 +9,7 @@ SERVICE_WRITE_PID=1
 
 
 SHARE_DIR=/usr/share/gigaset-elements
+DATA_DIR=/usr/gigaset/data
 SCRIPT_DIR=${SHARE_DIR}/scripts
 
 source ${SCRIPT_DIR}/env.sh
@@ -20,6 +21,9 @@ start() {
     # generate keypairs and csr if needed
     ${SCRIPT_DIR}/ssl_gen_csr.sh
 
+    # remove tmp statuses
+    rm -f /tmp/cfg/statuses
+
     # check databases
     /usr/bin/coin
 
@@ -27,9 +31,8 @@ start() {
     service_start /usr/bin/jbus
 
     sleep 1
-    service_start /usr/bin/coco_tx --channel tx --ca ${SHARE_DIR}/ca-bundle.pem
-    service_start /usr/bin/coco_rx --channel rx --ca ${SHARE_DIR}/ca-bundle.pem
-    service_start /usr/bin/coco_dx --channel dx --ca ${SHARE_DIR}/ca-bundle.pem
+    service_start /usr/bin/wdt -s ${SCRIPT_DIR}/wdt_reset.sh
+    service_start /usr/bin/coco --ca ${SHARE_DIR}/ca-bundle.pem --key ${DATA_DIR}/cert/cert.key --cert ${DATA_DIR}/cert/cert.crt
     service_start /usr/bin/tram
     service_start /usr/bin/qpa
     service_start /usr/bin/tick
@@ -46,11 +49,10 @@ start() {
 stop() {
     service_stop /usr/bin/tram
     service_stop /usr/bin/qpa
-    service_stop /usr/bin/coco_dx
-    service_stop /usr/bin/coco_rx
-    service_stop /usr/bin/coco_tx
+    service_stop /usr/bin/coco
     service_stop /usr/bin/tick
     service_stop /usr/bin/uleapp
+    service_stop /usr/bin/wdt
     service_stop /usr/bin/jbus
 }
 

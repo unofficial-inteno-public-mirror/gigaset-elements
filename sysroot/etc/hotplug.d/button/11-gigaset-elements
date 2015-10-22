@@ -9,7 +9,7 @@ console_out()
 
 case "$ACTION" in
     add|register)
-    [ "dectbutton" == "$INTERFACE" ] && {
+    [ "dectshort" == "$INTERFACE" ] && {
         local claimed=$(jbus.ui cloud.claiming get_status 2> /dev/null)
         [ "$claimed" == "claimed" ] && {
             console_out "Start sensor registering"

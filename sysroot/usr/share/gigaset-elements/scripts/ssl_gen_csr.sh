@@ -42,7 +42,7 @@ gen_ssl_files() {
         echo "Key file ${KEYPAIR} already exists. Skipping generation."
     else
         echo "Generating key file"
-        /usr/bin/coco --genkey --out ${KEYPAIR}
+        /usr/bin/coco genkey --out ${KEYPAIR}
     fi
 
     # Generate certificate request if necessary
@@ -50,7 +50,7 @@ gen_ssl_files() {
         echo "CSR file ${CSR} already exists. Skipping generation."
     else
         echo "Generating csr file"
-        /usr/bin/coco --gencsr --conf ${OPENSSL_CONF} --in ${KEYPAIR} --out ${CSR}
+        /usr/bin/coco gencsr --conf ${OPENSSL_CONF} --in ${KEYPAIR} --out ${CSR}
     fi
 
     # Certificate recovering
