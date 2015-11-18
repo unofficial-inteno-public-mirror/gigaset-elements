@@ -6,11 +6,21 @@
 #
 get_version()
 {
-    local dev_info=$(cat /lib/db/version/iop_version)
+    local dev_info=$(db get hw.board.iopVersion 2>/dev/null)
 
     echo ${dev_info}
 }
 
+
+# Return status of wan interface
+#
+get_wan_status()
+{
+    local dev=$(uci get network.wan.ifname)
+    status=$(ifconfig $dev 2>/dev/null)
+
+    [[ -n "$status" ]] && echo "up"
+}
 
 
 # unlock basestation
