@@ -8,18 +8,32 @@ SERVICE_DAEMONIZE=1
 SERVICE_WRITE_PID=1
 
 
-SHARE_DIR=/usr/share/gigaset-elements
-DATA_DIR=/usr/gigaset/data
-SCRIPT_DIR=${SHARE_DIR}/scripts
+GIGA_DIR=${GIGA_DIR:-/usr/share/gigaset}
 
-source ${SCRIPT_DIR}/env.sh
+BIN_DIR=$GIGA_DIR/usr/bin
+ETC_DIR=$GIGA_DIR/etc
+DATA_DIR=/usr/gigaset/data
+
+
+
+source $BIN_DIR/env.sh
 
 
 start() {
-    export PATH=$SCRIPT_DIR:$SHARE_DIR:$PATH
+    export PATH=$BIN_DIR:$PATH
+
+    # Export variables set by env.sh
+    export TFTP_DIR=$TFTP_DIR
+    export DEVICE_ID=$DEVICE_ID
+    export BAS_TAG=$BAS_TAG
+    export BAS_HASH=$BAS_HASH
+    export UA="Basestation/$BAS_TAG"
 
     # generate keypairs and csr if needed
-    ${SCRIPT_DIR}/ssl_gen_csr.sh
+    [[ -f $BIN_DIR/ssl_gen.sh ]] && $BIN_DIR/ssl_gen.sh
+
+    # run pre reef script
+    [[ -f $BIN_DIR/pre_reef.sh ]] && source $BIN_DIR/pre_reef.sh
 
     # remove tmp statuses
     rm -f /tmp/cfg/statuses
@@ -31,21 +45,17 @@ start() {
     service_start /usr/bin/jbus
 
     sleep 1
-    service_start /usr/bin/wdt -s ${SCRIPT_DIR}/wdt_reset.sh
-    service_start /usr/bin/coco --ca ${SHARE_DIR}/ca-bundle.pem --key ${DATA_DIR}/cert/cert.key --cert ${DATA_DIR}/cert/cert.crt
+    service_start /usr/bin/wdt  -s $BIN_DIR/wdt_reset.sh
+    service_start /usr/bin/coco --ca $ETC_DIR/ssl/certs/ca-bundle.pem --key $DATA_DIR/cert/cert.key --cert $DATA_DIR/cert/cert.crt
     service_start /usr/bin/tram
     service_start /usr/bin/qpa
     service_start /usr/bin/tick
     service_start /usr/bin/uleapp -6 -c
 
+    echo REEF basestation ready.
 
-    sleep 1
-    if [[ "$(get_wan_status)" == "up" ]]; then
-        touch /var/run/lan.ok
-        echo -e "{\"link\": true}" | /usr/bin/sender 127.0.0.1 network
-    else
-        echo -e "{\"link\": false}" | /usr/bin/sender 127.0.0.1 network
-    fi
+    # run post reef script
+    [[ -f $BIN_DIR/post_reef.sh ]] && source $BIN_DIR/post_reef.sh
 }
 
 
