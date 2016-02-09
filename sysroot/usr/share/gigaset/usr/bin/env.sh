@@ -1,5 +1,6 @@
 #!/bin/sh
 
+GIGA_DIR=${GIGA_DIR:-/usr/share/gigaset}
 DATA_DIR=${DATA_DIR:-/usr/gigaset/data}
 
 
@@ -24,15 +25,19 @@ export jbus_logcfg="0"
 
 [[ -z "$DEVICE_ID" ]] && DEVICE_ID=$(uci get gigaset.elements.deviceid 2> /dev/null)
 
-[[ -z "$BAS_TAG" ]]  && BAS_TAG="bas-001.000.038/$(get_version)"
-[[ -z "$BAS_HASH" ]] && BAS_HASH="3837546f98d4aca60a6e269d2bac790942e498b2"
+[[ -z "$BAS_TAG" ]]  && BAS_TAG=$(cat $GIGA_DIR/etc/version | grep -w "REEF_BAS_VERSION" | cut -d \" -f 2)/$(get_version)
+[[ -z "$BAS_HASH" ]] && BAS_HASH=$(cat $GIGA_DIR/etc/version | grep -w "REEF_BAS_HASH" | cut -d \" -f 2)
 
 
-
+# check if DEVICE_ID is set
+if [ -z "$DEVICE_ID" ]; then
+    printf "DEVICE_ID not set. Aborted" > /dev/console
+    exit 1
+fi
 
 
 RUNBG=${RUNBG:-}
-[ -f "/usr/share/gigaset/runbg" ] && RUNBG=1
+[ -f "$GIGA_DIR/runbg" ] && RUNBG=1
 
 if [ -n "$RUNBG" ]; then
     # Overwrite function to run apps in background
