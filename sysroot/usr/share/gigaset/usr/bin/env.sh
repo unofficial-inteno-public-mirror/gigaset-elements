@@ -14,8 +14,8 @@ get_version()
 }
 
 
-# unlock basestation
-export system_locked="false"
+# lock basestation
+export system_locked="true"
 
 # disable jbus log
 export jbus_logcfg="0"
