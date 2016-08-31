@@ -31,7 +31,7 @@ export jbus_logcfg="0"
 
 # check if DEVICE_ID is set
 if [ -z "$DEVICE_ID" ]; then
-    printf "DEVICE_ID not set. Aborted" > /dev/console
+    logger -s -t gigaset -p alert "DEVICE_ID not set. Aborted"
     exit 1
 fi
 
