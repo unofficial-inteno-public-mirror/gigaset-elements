@@ -6,7 +6,12 @@ SCENARIO=$2
 if [ "$LED" == "dect" ]; then
     case "$SCENARIO" in
         off)
-            ubus call led.dect set '{"state":"off"}'
+            # With the introduction of Dectmngr2 in Iopsys LED
+            # behavior has changed:
+            #   off = radio disabled
+            #   on = radio enabled
+            #   flashing = registration active
+            ubus call led.dect set '{"state":"on"}'
             ;;
 
         slow)
