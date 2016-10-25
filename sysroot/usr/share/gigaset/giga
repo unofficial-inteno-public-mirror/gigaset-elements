@@ -18,22 +18,43 @@ EOF
 }
 
 
+# Return default wan interface
+#
+get_def_interface()
+{
+    local ifname="$(ip r | grep default | awk '{print$5}')"
+    if [ -n "$ifname" ]; then
+        echo $ifname
+        return
+    fi
 
-# Return MAC address of the wan interface
+    local wan_ifnames=$(uci get network.wan.ifname)
+    for ifname in ${wan_ifnames}
+    do
+        if [ -n "$ifname" ]; then
+            echo $ifname
+            return
+        fi
+    done
+
+    echo "default interface not found" >&2
+    exit 1
+}
+
+
+# Return MAC address of the given interface
 #
 get_mac()
 {
-    local wan_ifname=$(uci get network.wan.ifname)
-    # trim
-    wan_ifname=$(echo ${wan_ifname} | xargs)
+    local ifname="$1"
 
-    local wan_mac=$(cat /sys/class/net/${wan_ifname}/address)
+    local mac=$(cat /sys/class/net/${ifname}/address)
     # convert to upercase
-    wan_mac=$(echo ${wan_mac} | tr "[a-z]" "[A-Z]")
+    mac=$(echo ${mac} | tr "[a-z]" "[A-Z]")
     # remove colons
-    wan_mac=$(echo ${wan_mac} | tr -d ":")
+    mac=$(echo ${mac} | tr -d ":")
 
-    echo ${wan_mac}
+    echo ${mac}
 }
 
 
@@ -74,7 +95,12 @@ set_devid()
     local conf_file="/etc/config/gigaset"
     if [ ! -e "$conf_file" ]; then
         # generate device id
-        [ -z "$deviceid" ] && deviceid="INTENOXXXXXXXXXXXXXX$(get_mac)"
+        if [ -z "$deviceid" ]; then
+            ifname=$(get_def_interface)
+            ifmac=$(get_mac ${ifname})
+            [ -z "$ifmac" ] && exit 1
+            deviceid="INTENOXXXXXXXXXXXXXX${ifmac}"
+        fi
 
         touch $conf_file
         uci set gigaset.elements=gigaset
