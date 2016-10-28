@@ -1,0 +1,15 @@
+#!/bin/sh
+
+[[ "$INTERFACE" != "wan" ]] && return
+
+case "$ACTION" in
+    ifup)
+        touch /var/run/lan.ok
+        echo -e "{\"link\": true}" | /usr/bin/sender 127.0.0.1 network
+    ;;
+    ifdown)
+        rm -f /var/run/lan.ok
+        echo -e "{\"link\": false}" | /usr/bin/sender 127.0.0.1 network
+    ;;
+esac
+
